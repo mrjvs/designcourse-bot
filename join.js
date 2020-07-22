@@ -1,4 +1,4 @@
-const { max_joins, role_timeout } = require("./config.json");
+const { max_joins, role_timeout, invite } = require("./config.json");
 const { getThrottleStatus, getTimeoutStatus, getThrottleChannel, getTimeoutChannel } = require("./helpers/storage");
 
 let throttle = {}
@@ -43,10 +43,10 @@ function startRoleTimer(usr) {
 async function kickThrottledUser(usr) {
     try {
         if (getThrottleChannel(usr.guild.id))
-            await usr.client.guilds.cache.get(usr.guild.id).channels.cache.get(getThrottleChannel(usr.guild.id)).send("User got throttled!");
+            await usr.client.guilds.cache.get(usr.guild.id).channels.cache.get(getThrottleChannel(usr.guild.id)).send(`**User got throttled:**\nuser: ${usr.user.tag} (${usr.id})`);
     } catch (e) {}
     try {
-        await usr.send("Your join got throttled!");
+        await usr.send(`Hey ${usr.user.username},\n\nDesignCourse is currently experiencing a lot of joins at once.\nIn this case we limit the speed at which people join.\n**Please wait 1 minute**, then you can join again with this invite link: ${invite}\n\nThank you for your patience\n - The Designcourse Mod team`);
     } catch (e) {}
     try {
         await usr.kick("User join got throttled!");
@@ -56,13 +56,13 @@ async function kickThrottledUser(usr) {
 async function kickTimeoutUser(usr) {
     try {
         if (getTimeoutChannel(usr.guild.id))
-            await usr.client.guilds.cache.get(usr.guild.id).channels.cache.get(getTimeoutChannel(usr.guild.id)).send("User get timed out!");
+            await usr.client.guilds.cache.get(usr.guild.id).channels.cache.get(getTimeoutChannel(usr.guild.id)).send(`**User got timed out:**\nuser: ${usr.user.tag} (${usr.id})`);
     } catch (e) {}
     try {
-        await usr.send("Your role choosing got timedout!"); 
+        await usr.send(`Hey ${usr.user.username},\n\nYou're taking a long time to choose your role, we've kicked you from the server but you can join back with this invite: ${invite}\nIf you're having trouble with the role system. Consider sending one of us a message.\n - The Designcourse Mod team`); 
     } catch (e) {}
     try {
-        await usr.kick("User got timedout!");
+        await usr.kick("User got timed out!");
     } catch (e) {}
 }
 
