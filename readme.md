@@ -8,5 +8,7 @@ features:
  - user join throttling.
 
 todo:
- - better formatted logs
- - help command
+ 1. format logs in embeds
+ 2. improve dm's sent when throttled or timed out.
+ 3. test everything a bunch
+ 4. proof read text
