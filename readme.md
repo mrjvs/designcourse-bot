@@ -8,4 +8,5 @@ features:
  - user join throttling.
 
 todo:
- - setup channels for logging timeouts and throttling
+ - better formatted logs
+ - help command

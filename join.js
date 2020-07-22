@@ -1,5 +1,5 @@
 const { max_joins, role_timeout } = require("./config.json");
-const { getThrottleStatus, getTimeoutStatus } = require("./helpers/storage");
+const { getThrottleStatus, getTimeoutStatus, getThrottleChannel, getTimeoutChannel } = require("./helpers/storage");
 
 let throttle = {}
 let throttleUsers = {}
@@ -41,7 +41,10 @@ function startRoleTimer(usr) {
 }
 
 async function kickThrottledUser(usr) {
-    console.log("User got throttled!");
+    try {
+        if (getThrottleChannel(usr.guild.id))
+            await usr.client.guilds.cache.get(usr.guild.id).channels.cache.get(getThrottleChannel(usr.guild.id)).send("User got throttled!");
+    } catch (e) {}
     try {
         await usr.send("Your join got throttled!");
     } catch (e) {}
@@ -51,7 +54,10 @@ async function kickThrottledUser(usr) {
 }
 
 async function kickTimeoutUser(usr) {
-    console.log("User got Timed out");
+    try {
+        if (getTimeoutChannel(usr.guild.id))
+            await usr.client.guilds.cache.get(usr.guild.id).channels.cache.get(getTimeoutChannel(usr.guild.id)).send("User get timed out!");
+    } catch (e) {}
     try {
         await usr.send("Your role choosing got timedout!"); 
     } catch (e) {}
