@@ -27,6 +27,13 @@ client.on('message', msg => {
 
     const theCmd = cmds.find(cmd => cmd.cmd == args[0]);
     if (!theCmd) return;
+
+    if (theCmd.admin) {
+        if (!msg.member.hasPermission("ADMINISTRATOR")) {
+            msg.channel.send("Whoops, you don't have access to that command!")
+            return
+        }
+    }
     theCmd.execute(msg, args);
 });
 

@@ -11,6 +11,7 @@ function settTimeoutStatus(msg, _, bool) {
 
 module.exports = {
     cmd: "timeout",
+    admin: true,
     execute: (msg, args) => {
         if (args[1] == "status") gettTimeoutStatus(msg, args);
         else if (args[1] == "enable") settTimeoutStatus(msg, args, true);

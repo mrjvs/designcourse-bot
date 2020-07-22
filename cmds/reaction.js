@@ -41,6 +41,7 @@ async function removeReaction(msg, args) {
 
 module.exports = {
     cmd: "reaction",
+    admin: true,
     execute: (msg, args) => {
         if (args[1] == "set") setMessage(msg, args);
         else if (args[1] == "channel") setChannel(msg, args);

@@ -19,6 +19,7 @@ function settThrottleStatus(msg, _, bool) {
 
 module.exports = {
     cmd: "throttle",
+    admin: true,
     execute: (msg, args) => {
         if (args[1] == "trigger") triggerThrottle(msg, args);
         else if (args[1] == "status") gettThrottleStatus(msg, args);

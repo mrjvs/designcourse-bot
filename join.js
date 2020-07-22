@@ -2,9 +2,11 @@ const { max_joins, role_timeout } = require("./config.json");
 const { getThrottleStatus, getTimeoutStatus } = require("./helpers/storage");
 
 let throttle = {}
+let throttleUsers = {}
 
 const interval = setInterval(() => {
     throttle = {};
+    throttleUsers = {};
 }, 60*1000);
 
 function onJoin(usr) {
@@ -17,9 +19,15 @@ function onJoin(usr) {
 async function doThrottle(usr) {
     if (!throttle[usr.guild.id])
         throttle[usr.guild.id] = 0;
-    throttle[usr.guild.id]++;
-    if (throttle[usr.guild.id] <= max_joins)
+    if (!throttleUsers[usr.guild.id])
+        throttleUsers[usr.guild.id] = [];
+    if (!throttleUsers[usr.guild.id].includes(usr.id))
+        throttle[usr.guild.id]++;
+    if (throttle[usr.guild.id] <= max_joins) {
+        if (!throttleUsers[usr.guild.id].includes(usr.id))
+            throttleUsers[usr.guild.id].push(usr.id);
         return
+    }
     await kickThrottledUser(usr);
 }
 
