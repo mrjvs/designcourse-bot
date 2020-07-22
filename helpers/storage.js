@@ -72,6 +72,44 @@ function getStore() {
     return {}
 }
 
+function getThrottleStatus(guildId) {
+    let data = getStore();
+    if (!data.throttle)
+        return false;
+    if (!data.throttle[guildId])
+        return false;
+    if (data.throttle[guildId] === true)
+        return true;
+    return false;
+}
+
+function setThrottleStatus(guildId, bool) {
+    let data = getStore();
+    if (!data.throttle)
+        data.throttle = {};
+    data.throttle[guildId] = bool;
+    setStore(data);
+}
+
+function getTimeoutStatus(guildId) {
+    let data = getStore();
+    if (!data.timeout)
+        return false;
+    if (!data.timeout[guildId])
+        return false;
+    if (data.timeout[guildId] === true)
+        return true;
+    return false;
+}
+
+function setTimeoutStatus(guildId, bool) {
+    let data = getStore();
+    if (!data.timeout)
+        data.timeout = {};
+    data.timeout[guildId] = bool;
+    setStore(data);
+}
+
 function setStore(s) {
     fs.writeFileSync(file, JSON.stringify(s));
     cache = {...s};
@@ -83,5 +121,9 @@ module.exports = {
     removeReaction,
     hasMessage,
     setChannel,
-    getStore
+    getStore,
+    setThrottleStatus,
+    getThrottleStatus,
+    setTimeoutStatus,
+    getTimeoutStatus
 };

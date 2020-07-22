@@ -1,4 +1,5 @@
 const { max_joins, role_timeout } = require("./config.json");
+const { getThrottleStatus, getTimeoutStatus } = require("./helpers/storage");
 
 let throttle = {}
 
@@ -7,8 +8,10 @@ const interval = setInterval(() => {
 }, 60*1000);
 
 function onJoin(usr) {
-    doThrottle(usr);
-    startRoleTimer(usr);
+    if (getThrottleStatus(usr.guild.id))
+        doThrottle(usr);
+    if (getTimeoutStatus(usr.guild.id))
+        startRoleTimer(usr);
 }
 
 async function doThrottle(usr) {
@@ -17,14 +20,15 @@ async function doThrottle(usr) {
     throttle[usr.guild.id]++;
     if (throttle[usr.guild.id] <= max_joins)
         return
-    await kickThrottledUser();
+    await kickThrottledUser(usr);
 }
 
 function startRoleTimer(usr) {
-    setTimeout(() => {
-        if (usr.roles.cache.length > 0)
+    setTimeout(async () => {
+        const user = await usr.fetch();
+        if (user.roles.cache.array().length > 1)
             return;
-        kickTimeoutUser(usr);
+        kickTimeoutUser(user);
     }, role_timeout);
 }
 
@@ -39,7 +43,7 @@ async function kickThrottledUser(usr) {
 }
 
 async function kickTimeoutUser(usr) {
-    console.log("User got Throttled");
+    console.log("User got Timed out");
     try {
         await usr.send("Your role choosing got timedout!"); 
     } catch (e) {}
@@ -49,5 +53,6 @@ async function kickTimeoutUser(usr) {
 }
 
 module.exports = {
-    onJoin
+    onJoin,
+    doThrottle
 };
