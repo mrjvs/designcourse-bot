@@ -1,30 +1,40 @@
 const { prefix } = require("../config.json");
+const cmds = require("./index");
+const { sendError } = require("../helpers/embed");
 
-const content = (p)=>`
-**REACTION**
-\`${p}reaction refresh\` - refresh emoji checker, in case its broken
-\`${p}reaction set <messageid>\` - set message id on which to listen
-\`${p}reaction add <emojiid> <roleid>\` - add emoji to the role list
-\`${p}reaction remove <emojiid>\` - remove emoji from the rolel list
-\`${p}reaction channel <channelid>\` - set channel id where the message is from
-
-**THROTTLE**
-\`${p}throttle status\` - get throttle status
-\`${p}throttle channel\` - sets channel on which to log
-\`${p}throttle enable\`
-\`${p}throttle disable\`
-
-**TIMEOUT**
-\`${p}timeout status\` - get timeout status
-\`${p}timeout channel\` - sets channel on which to log
-\`${p}timeout enable\`
-\`${p}timeout disable\`
-`
+function getHelp(cmd) {
+    let usage = "";
+    if (cmd.subCommands) {
+        usage += "\n"
+        Object.keys(cmd.subCommands).forEach(sub => {
+            let subCmd = cmd.subCommands[sub];
+            usage += `\`${prefix}${cmd.cmd} ${sub} ${subCmd.args.join(" ")}\`${subCmd.description ? " - " + subCmd.description : ""}\n`
+        })
+    }
+    return `**${prefix}${cmd.cmd}** ${cmd.admin ? "(need admin)" : ""}\n${cmd.description}\n${usage}`
+}
 
 module.exports = {
     cmd: "help",
     admin: false,
     execute: (msg, args) => {
-        msg.channel.send(content(prefix));
+        let description;
+        let title = "Help"
+        if (args[1]) {
+            const theCmd = cmds.find(cmd=>cmd.cmd==args[1]);
+            if (!theCmd) {
+                sendError(msg.channel, "Can't find that command");
+                return
+            }
+            title = "Help for " + prefix + theCmd.cmd;
+            description = getHelp(theCmd);
+        }
+        else {
+            description = cmds.map(v=>getHelp(v)).join("\n");
+        }
+        msg.channel.send({embed: {
+            title,
+            description
+        }});
     }
 };

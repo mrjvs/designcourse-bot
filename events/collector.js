@@ -1,27 +1,26 @@
-const { getStore, hasMessage } = require("./helpers/storage");
+const { get } = require("../helpers/storage");
+const { reactionsReady } = require("../helpers/reaction");
 
 // add reaction message to cache and refresh emojis
 async function initGuild(client, guildId) {
-    const store = getStore();
-    const reaction = store.reaction[guildId];
-    if (!reaction.channel || !reaction.id)
+    const reaction = get("reactions", guildId);
+    if (!reactionsReady(guildId))
         return false;
     const guild = client.guilds.cache.get(guildId);
     const channel = guild.channels.cache.get(reaction.channel);
-    await channel.messages.fetch(reaction.id);
+    await channel.messages.fetch(reaction.message);
     addNewReactions(guild);
 }
 
 async function addNewReactions(guild) {
-    const store = getStore();
-    const reaction = store.reaction[guild.id];
-    if (!reaction.channel || !reaction.id)
+    const reaction = get("reactions", guild.id);
+    if (!reactionsReady(guild.id))
         return false;
     const channel = guild.channels.cache.get(reaction.channel);
-    let message = await channel.messages.cache.get(reaction.id);
+    let message = await channel.messages.cache.get(reaction.message);
     let client = message.reactions.client;
 
-    let emojis = Object.keys(store.reaction[guild.id].reactions);
+    let emojis = Object.keys(reaction.reactions).filter(e=>!!e);
 
     message.reactions.cache.forEach((v)=> {
         if (emojis.indexOf(v._emoji.id) == -1)
@@ -35,21 +34,22 @@ async function addNewReactions(guild) {
 
 async function handleReactionToggle(rct, usr, addRole) {
     const guildId = rct.message.channel.guild.id;
+    const channelId = rct.message.channel.id;
     const messageId = rct.message.id;
 
     if (usr.bot)
         return false
 
-    if (!hasMessage(guildId))
+    if (!reactionsReady(guildId))
         return false
 
-    const store = getStore();
-    if (store.reaction[guildId].id !== messageId)
+    const reaction = get("reactions", guildId);
+    if (reaction.message !== messageId || reaction.channel !== channelId)
         return false
 
     if (!rct._emoji.id)
         return false;
-    const roleId = store.reaction[guildId].reactions[rct._emoji.id];
+    const roleId = reaction.reactions[rct._emoji.id];
     if (!roleId)
         return false;
 

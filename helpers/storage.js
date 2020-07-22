@@ -3,65 +3,67 @@ const fs = require("fs");
 const file = "./store";
 let cache;
 
-function setMessage(guildId, msgid) {
-    let data = getStore();
-    if (!data.reaction)
-        data.reaction = {}
-    if (!data.reaction[guildId]) {
-        data.reaction[guildId] = {
-            reactions: {}
-        }
+/*
+guilddata: {
+    reactions: {
+        message: MESSAGE_ID,
+        channel: CHANNEL_ID,
+        reactions: {} KEY:VALUE - EMOJI_ID:ROLE_ID
+    },
+    throttle: {
+        status: BOOLEAN,
+        log_channel: CHANNEL_ID
+    },
+    timeout: {
+        status: BOOLEAN,
+        log_channel: CHANNEL_ID
     }
-    data.reaction[guildId].id = msgid;
-    setStore(data);
+}
+*/
+
+function getFollowPath(obj, parts) {
+    if (parts.length == 0)
+        return obj;
+    
+    if (typeof obj[parts[0]] === "undefined")
+        return undefined;
+    obj = obj[parts[0]];
+    parts.shift();
+    return getFollowPath(obj, parts);
 }
 
-function setChannel(guildId, channelId) {
-    let data = getStore();
-    if (!data.reaction)
-        data.reaction = {}
-    if (!data.reaction[guildId]) {
-        data.reaction[guildId] = {
-            reactions: {}
-        }
+function setFollowPath(obj, parts, value) {
+    if (parts.length == 1) {
+        obj[parts] = value;
+        return
     }
-    data.reaction[guildId].channel = channelId;
-    setStore(data);
+
+    if (typeof obj[parts[0]] === "undefined")
+        obj[parts[0]] = {};
+    obj = obj[parts[0]];
+    parts.shift();
+    setFollowPath(obj, parts, value);
 }
 
-function addReaction(guildId, emojiId, roleId) {
-    let data = getStore();
-    if (!data.reaction)
-        data.reaction = {}
-    if (!data.reaction[guildId]) {
-        data.reaction[guildId] = {
-            reactions: {}
-        }
-    }
-    data.reaction[guildId].reactions[emojiId] = roleId;
-    setStore(data);
+function get(path, guildId) {
+    data = getStore();
+    if (!data[guildId])
+        data[guildId] = {};
+    return getFollowPath(data[guildId], path.split("."));
 }
 
-function removeReaction(guildId, emojiId) {
-    let data = getStore();
-    if (!data.reaction)
-        data.reaction = {}
-    if (!data.reaction[guildId]) {
-        data.reaction[guildId] = {
-            reactions: {}
-        }
-    }
-    data.reaction[guildId].reactions[emojiId] = undefined;
+function set(path, guildId, value) {
+    data = getStore();
+    if (!data[guildId])
+        data[guildId] = {};
+    setFollowPath(data[guildId], path.split("."), value);
     setStore(data);
-}
-
-function hasMessage(guildId) {
-    let data = getStore();
-    if (!data.reaction)
-        return false;
-    if (!data.reaction[guildId])
-        return false;
     return true;
+}
+
+function getAllGuilds() {
+    const data = getStore();
+    return Object.keys(data);
 }
 
 function getStore() {
@@ -72,96 +74,13 @@ function getStore() {
     return {}
 }
 
-function getThrottleStatus(guildId) {
-    let data = getStore();
-    if (!data.throttle)
-        return false;
-    if (!data.throttle[guildId])
-        return false;
-    if (data.throttle[guildId] === true)
-        return true;
-    return false;
-}
-
-function setThrottleStatus(guildId, bool) {
-    let data = getStore();
-    if (!data.throttle)
-        data.throttle = {};
-    data.throttle[guildId] = bool;
-    setStore(data);
-}
-
-function getThrottleChannel(guildId) {
-    let data = getStore();
-    if (!data.throttleChannel)
-        return false;
-    if (!data.throttleChannel[guildId])
-        return false;
-    return data.throttleChannel[guildId];
-}
-
-function setThrottleChannel(guildId, channelId) {
-    let data = getStore();
-    if (!data.throttleChannel)
-        data.throttleChannel = {};
-    data.throttleChannel[guildId] = channelId;
-    setStore(data);
-}
-
-function getTimeoutChannel(guildId) {
-    let data = getStore();
-    if (!data.TimeoutChannel)
-        return false;
-    if (!data.TimeoutChannel[guildId])
-        return false;
-    return data.TimeoutChannel[guildId];
-}
-
-function setTimeoutChannel(guildId, channelId) {
-    let data = getStore();
-    if (!data.TimeoutChannel)
-        data.TimeoutChannel = {};
-    data.TimeoutChannel[guildId] = channelId;
-    setStore(data);
-}
-
-function getTimeoutStatus(guildId) {
-    let data = getStore();
-    if (!data.timeout)
-        return false;
-    if (!data.timeout[guildId])
-        return false;
-    if (data.timeout[guildId] === true)
-        return true;
-    return false;
-}
-
-function setTimeoutStatus(guildId, bool) {
-    let data = getStore();
-    if (!data.timeout)
-        data.timeout = {};
-    data.timeout[guildId] = bool;
-    setStore(data);
-}
-
 function setStore(s) {
     fs.writeFileSync(file, JSON.stringify(s));
     cache = {...s};
 }
 
 module.exports = {
-    setMessage,
-    addReaction,
-    removeReaction,
-    hasMessage,
-    setChannel,
-    getStore,
-    setThrottleStatus,
-    getThrottleStatus,
-    setTimeoutStatus,
-    getTimeoutStatus,
-    setTimeoutChannel,
-    getTimeoutChannel,
-    setThrottleChannel,
-    getThrottleChannel
+    get,
+    set,
+    getAllGuilds
 };

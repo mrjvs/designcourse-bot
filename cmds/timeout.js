@@ -1,29 +1,44 @@
-const { getTimeoutStatus, setTimeoutStatus, setTimeoutChannel, getTimeoutChannel } = require("../helpers/storage");
+const { get, set } = require("../helpers/storage");
+const { sendSuccess } = require("../helpers/embed");
 
-function gettTimeoutStatus(msg) {
-    msg.channel.send(`Timeout status: ${getTimeoutStatus(msg.guild.id) ? "Enabled" : "Disabled"}!\nTimeout channel: <#${getTimeoutChannel(msg.guild.id)}>`);
+function getTimeoutStatus(msg) {
+    sendSuccess(msg.channel, `Timeout status: ${get("timeout.status", msg.guild.id) ? "Enabled" : "Disabled"}!\nTimeout channel: <#${get("timeout.channel", msg.guild.id)}>`);
 }
 
-function settTimeoutStatus(msg, _, bool) {
-    setTimeoutStatus(msg.guild.id, bool);
-    msg.channel.send("Timeout status has been set to: " + (bool ? "Enabled" : "Disabled"));
+function setTimeoutStatus(msg, _, bool) {
+    set("timeout.status", msg.guild.id, bool);
+    sendSuccess(msg.channel, "Timeout status has been set to: " + (bool ? "Enabled" : "Disabled"));
 }
 
-function settTimeoutChannel(msg, args) {
-    setTimeoutChannel(msg.guild.id, args[2]);
-    msg.channel.send("Timeout channel has been set to: <#" + args[2] + ">!");
+function setTimeoutChannel(msg, args) {
+    set("timeout.channel", msg.guild.id, args[2]);
+    sendSuccess(msg.channel, "Timeout channel has been set to: <#" + args[2] + ">!");
 }
 
 module.exports = {
     cmd: "timeout",
     admin: true,
-    execute: (msg, args) => {
-        if (args[1] == "status") gettTimeoutStatus(msg, args);
-        else if (args[1] == "enable") settTimeoutStatus(msg, args, true);
-        else if (args[1] == "disable") settTimeoutStatus(msg, args, false);
-        else if (args[1] == "channel") settTimeoutChannel(msg, args);
-        else {
-            msg.channel.send("That's not how you use this command")
+    description: "Timeout users that don't get a role after a certain amount of time",
+    subCommands: {
+        status: {
+            args: [],
+            description: "Get timeout status",
+            execute: getTimeoutStatus
+        },
+        channel: {
+            args: ["<channelId>"],
+            description: "Set channel to log timeouts in",
+            execute: setTimeoutChannel
+        },
+        enable: {
+            args: [],
+            description: "Enable timeouts",
+            execute: (msg, args) => setTimeoutStatus(msg, args, true)
+        },
+        disable: {
+            args: [],
+            description: "Disable timeouts",
+            execute: (msg, args) => setTimeoutStatus(msg, args, false)
         }
     }
 };
