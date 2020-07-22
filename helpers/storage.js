@@ -91,6 +91,40 @@ function setThrottleStatus(guildId, bool) {
     setStore(data);
 }
 
+function getThrottleChannel(guildId) {
+    let data = getStore();
+    if (!data.throttleChannel)
+        return false;
+    if (!data.throttleChannel[guildId])
+        return false;
+    return data.throttleChannel[guildId];
+}
+
+function setThrottleChannel(guildId, channelId) {
+    let data = getStore();
+    if (!data.throttleChannel)
+        data.throttleChannel = {};
+    data.throttleChannel[guildId] = channelId;
+    setStore(data);
+}
+
+function getTimeoutChannel(guildId) {
+    let data = getStore();
+    if (!data.TimeoutChannel)
+        return false;
+    if (!data.TimeoutChannel[guildId])
+        return false;
+    return data.TimeoutChannel[guildId];
+}
+
+function setTimeoutChannel(guildId, channelId) {
+    let data = getStore();
+    if (!data.TimeoutChannel)
+        data.TimeoutChannel = {};
+    data.TimeoutChannel[guildId] = channelId;
+    setStore(data);
+}
+
 function getTimeoutStatus(guildId) {
     let data = getStore();
     if (!data.timeout)
@@ -125,5 +159,9 @@ module.exports = {
     setThrottleStatus,
     getThrottleStatus,
     setTimeoutStatus,
-    getTimeoutStatus
+    getTimeoutStatus,
+    setTimeoutChannel,
+    getTimeoutChannel,
+    setThrottleChannel,
+    getThrottleChannel
 };
