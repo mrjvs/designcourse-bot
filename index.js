@@ -3,8 +3,13 @@ const client = new Discord.Client();
 const { initGuild, handleReactionAdd, handleReactionRemove, handleReactionRemoveAll } = require("./events/collector");
 const { getAllGuilds } = require("./helpers/storage")
 const { onJoin } = require("./events/join")
-const { token } = require("./config.json")
+const { TOKEN } = process.env;
 const { messageHandler } = require("./events/command");
+
+if (["TOKEN", "MAX_JOINS", "INVITE", "ROLE_TIMEOUT"].reduce((p,v) => p ? p : typeof process.env[v] === "undefined", false)) {
+    console.error("Missing env variables, exiting");
+    process.exit(1);
+}
 
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
@@ -22,4 +27,4 @@ client.on("messageReactionRemoveAll", handleReactionRemoveAll);
 
 client.on("guildMemberAdd", onJoin);
 
-client.login(token);
+client.login(TOKEN);

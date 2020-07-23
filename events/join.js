@@ -1,4 +1,4 @@
-const { max_joins, role_timeout, invite } = require("../config.json");
+const { MAX_JOINS, ROLE_TIMEOUT, INVITE } = process.env;
 const { get } = require("../helpers/storage");
 
 let throttle = {}
@@ -24,7 +24,7 @@ async function doThrottle(usr) {
         throttleUsers[usr.guild.id] = [];
     if (!throttleUsers[usr.guild.id].includes(usr.id))
         throttle[usr.guild.id]++;
-    if (throttle[usr.guild.id] <= max_joins) {
+    if (throttle[usr.guild.id] <= parseInt(MAX_JOINS)) {
         if (!throttleUsers[usr.guild.id].includes(usr.id))
             throttleUsers[usr.guild.id].push(usr.id);
         return
@@ -45,7 +45,7 @@ function startRoleTimer(guildId, usr) {
                 return;
             kickTimeoutUser(user);
         } catch (e) {}
-    }, role_timeout);
+    }, parseInt(ROLE_TIMEOUT));
 }
 
 async function kickThrottledUser(usr) {
@@ -58,7 +58,7 @@ async function kickThrottledUser(usr) {
             }});
     } catch (e) {}
     try {
-        await usr.send(`Hey ${usr.user.username},\n\nDesignCourse is currently experiencing a lot of joins at once.\nIn this case we limit the speed at which people join.\n**Please wait 1 minute**, then you can join again with this invite link: ${invite}\n\nThank you for your patience\n - The Designcourse Mod team`);
+        await usr.send(`Hey ${usr.user.username},\n\nDesignCourse is currently experiencing a lot of joins at once.\nIn this case we limit the speed at which people join.\n**Please wait 1 minute**, then you can join again with this invite link: ${INVITE}\n\nThank you for your patience\n - The Designcourse Mod team`);
     } catch (e) {}
     try {
         await usr.kick("User join got throttled!");
@@ -75,7 +75,7 @@ async function kickTimeoutUser(usr) {
             }});
     } catch (e) {}
     try {
-        await usr.send(`Hey ${usr.user.username},\n\nYou're taking a long time to choose your role, we've kicked you from the server but you can join back with this invite: ${invite}\nIf you're having trouble with the role system. Consider sending one of us a message.\n - The Designcourse Mod team`); 
+        await usr.send(`Hey ${usr.user.username},\n\nYou're taking a long time to choose your role, we've kicked you from the server but you can join back with this invite: ${INVITE}\nIf you're having trouble with the role system. Consider sending one of us a message.\n - The Designcourse Mod team`); 
     } catch (e) {}
     try {
         await usr.kick("User got timed out!");

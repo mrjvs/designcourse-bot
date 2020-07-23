@@ -1,14 +1,14 @@
-const { prefix } = require("../config.json");
+const { PREFIX } = process.env;
 const { sendError } = require("../helpers/embed");
 let cmds = require("../cmds");
 cmds = [...cmds, require("../cmds/help")];
 
 function messageHandler(msg) {
     if (msg.author.bot) return;
-    if (!msg.content.startsWith(prefix)) return;
+    if (!msg.content.startsWith(PREFIX)) return;
 
     const args = msg.content.split(" ");
-    args[0] = args[0].slice(prefix.length);
+    args[0] = args[0].slice(PREFIX.length);
 
     const theCmd = cmds.find(cmd => cmd.cmd == args[0]);
     if (!theCmd) return;

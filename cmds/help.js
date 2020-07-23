@@ -1,4 +1,4 @@
-const { prefix } = require("../config.json");
+const { PREFIX } = process.env;
 const cmds = require("./index");
 const { sendError } = require("../helpers/embed");
 
@@ -8,10 +8,10 @@ function getHelp(cmd) {
         usage += "\n"
         Object.keys(cmd.subCommands).forEach(sub => {
             let subCmd = cmd.subCommands[sub];
-            usage += `\`${prefix}${cmd.cmd} ${sub} ${subCmd.args.join(" ")}\`${subCmd.description ? " - " + subCmd.description : ""}\n`
+            usage += `\`${PREFIX}${cmd.cmd} ${sub} ${subCmd.args.join(" ")}\`${subCmd.description ? " - " + subCmd.description : ""}\n`
         })
     }
-    return `**${prefix}${cmd.cmd}** ${cmd.admin ? "(need admin)" : ""}\n${cmd.description}\n${usage}`
+    return `**${PREFIX}${cmd.cmd}** ${cmd.admin ? "(need admin)" : ""}\n${cmd.description}\n${usage}`
 }
 
 module.exports = {
@@ -26,7 +26,7 @@ module.exports = {
                 sendError(msg.channel, "Can't find that command");
                 return
             }
-            title = "Help for " + prefix + theCmd.cmd;
+            title = "Help for " + PREFIX + theCmd.cmd;
             description = getHelp(theCmd);
         }
         else {
