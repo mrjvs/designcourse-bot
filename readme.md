@@ -8,7 +8,6 @@ features:
  - user join throttling.
 
 todo:
- 1. format logs in embeds
- 2. improve dm's sent when throttled or timed out.
- 3. test everything a bunch
- 4. proof read text
+ 1. improve dm's sent when throttled or timed out.
+ 2. test everything a bunch
+ 3. proof read text

@@ -33,6 +33,7 @@ module.exports = {
             description = cmds.map(v=>getHelp(v)).join("\n");
         }
         msg.channel.send({embed: {
+            color: 1752220,
             title,
             description
         }});
