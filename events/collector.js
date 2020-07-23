@@ -7,6 +7,8 @@ async function initGuild(client, guildId) {
     if (!reactionsReady(guildId))
         return false;
     const guild = client.guilds.cache.get(guildId);
+    if (!guild)
+        return false;
     const channel = guild.channels.cache.get(reaction.channel);
     await channel.messages.fetch(reaction.message);
     addNewReactions(guild);

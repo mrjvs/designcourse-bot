@@ -1,5 +1,6 @@
 module.exports = [
     require("./reaction"),
     require("./throttle"),
-    require("./timeout")
+    require("./timeout"),
+    require("./test")
 ];

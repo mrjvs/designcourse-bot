@@ -3,6 +3,7 @@ const { get } = require("../helpers/storage");
 
 let throttle = {}
 let throttleUsers = {}
+let timeouts = {};
 
 const interval = setInterval(() => {
     throttle = {};
@@ -13,7 +14,7 @@ function onJoin(usr) {
     if (get("throttle.status", usr.guild.id))
         doThrottle(usr);
     if (get("timeout.status", usr.guild.id))
-        startRoleTimer(usr);
+        startRoleTimer(usr.guild.id, usr);
 }
 
 async function doThrottle(usr) {
@@ -31,12 +32,19 @@ async function doThrottle(usr) {
     await kickThrottledUser(usr);
 }
 
-function startRoleTimer(usr) {
-    setTimeout(async () => {
-        const user = await usr.fetch();
-        if (user.roles.cache.array().length > 1)
-            return;
-        kickTimeoutUser(user);
+function startRoleTimer(guildId, usr) {
+    if (!timeouts[guildId])
+        timeouts[guildId] = {};
+    if (timeouts[guildId][usr.id])
+        clearTimeout(timeouts[guildId][usr.id]);
+    timeouts[guildId][usr.id] = setTimeout(async () => {
+        delete timeouts[guildId][usr.id];
+        try {
+            const user = await usr.fetch();
+            if (user.roles.cache.array().length > 1)
+                return;
+            kickTimeoutUser(user);
+        } catch (e) {}
     }, role_timeout);
 }
 
@@ -45,7 +53,7 @@ async function kickThrottledUser(usr) {
         if (get("throttle.channel", usr.guild.id))
             await usr.client.guilds.cache.get(usr.guild.id).channels.cache.get(get("throttle.channel", usr.guild.id)).send({embed:{
                 color: 1752220,
-                title: "Throttled got throttled",
+                title: "Throttled!",
                 description: `user: ${usr.user.tag} (${usr.id})`
             }});
     } catch (e) {}
@@ -62,7 +70,7 @@ async function kickTimeoutUser(usr) {
         if (get("timeout.channel", usr.guild.id))
             await usr.client.guilds.cache.get(usr.guild.id).channels.cache.get(get("timeout.channel", usr.guild.id)).send({embed:{
                 color: 1752220,
-                title: "Throttled got timed out",
+                title: "Timed out!",
                 description: `user: ${usr.user.tag} (${usr.id})`
             }});
     } catch (e) {}
@@ -74,7 +82,16 @@ async function kickTimeoutUser(usr) {
     } catch (e) {}
 }
 
+function getThrottleData() {
+    return {
+        throttle,
+        throttleUsers
+    }
+}
+
 module.exports = {
     onJoin,
-    doThrottle
+    getThrottleData,
+    kickTimeoutUser,
+    kickThrottledUser
 };
