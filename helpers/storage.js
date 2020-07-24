@@ -1,6 +1,6 @@
 const fs = require("fs");
 
-const file = "./store";
+const file = "./store/db.json";
 let cache;
 
 /*

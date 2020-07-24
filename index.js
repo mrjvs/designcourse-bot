@@ -6,7 +6,7 @@ const { onJoin } = require("./events/join")
 const { TOKEN } = process.env;
 const { messageHandler } = require("./events/command");
 
-if (["TOKEN", "MAX_JOINS", "INVITE", "ROLE_TIMEOUT"].reduce((p,v) => p ? p : typeof process.env[v] === "undefined", false)) {
+if (["TOKEN", "MAX_JOINS", "PREFIX", "INVITE", "ROLE_TIMEOUT"].reduce((p,v) => p ? p : typeof process.env[v] === "undefined", false)) {
     console.error("Missing env variables, exiting");
     process.exit(1);
 }

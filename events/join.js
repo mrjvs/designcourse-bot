@@ -54,7 +54,8 @@ async function kickThrottledUser(usr) {
             await usr.client.guilds.cache.get(usr.guild.id).channels.cache.get(get("throttle.channel", usr.guild.id)).send({embed:{
                 color: 1752220,
                 title: "Throttled!",
-                description: `user: ${usr.user.tag} (${usr.id})`
+                description: `user: ${usr.user.tag} (${usr.id})`,
+                timestamp: new Date()
             }});
     } catch (e) {}
     try {
@@ -71,7 +72,8 @@ async function kickTimeoutUser(usr) {
             await usr.client.guilds.cache.get(usr.guild.id).channels.cache.get(get("timeout.channel", usr.guild.id)).send({embed:{
                 color: 1752220,
                 title: "Timed out!",
-                description: `user: ${usr.user.tag} (${usr.id})`
+                description: `user: ${usr.user.tag} (${usr.id})`,
+                timestamp: new Date()
             }});
     } catch (e) {}
     try {
