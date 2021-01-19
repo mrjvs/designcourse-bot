@@ -24,7 +24,7 @@ async function addNewReactions(guild) {
 
     let emojis = Object.keys(reaction.reactions).filter(e=>!!e);
 
-    message.reactions.cache.forEach((v)=> {
+    message.reactions.cache.forEach((v) => {
         if (emojis.indexOf(v._emoji.id) == -1)
             return
         if (v.users.cache.has(client.user.id))
@@ -35,8 +35,9 @@ async function addNewReactions(guild) {
 }
 
 async function handleReactionToggle(rct, usr, addRole) {
-    const guildId = rct.message.channel.guild.id;
-    const channelId = rct.message.channel.id;
+    if (rct.partial)
+        rct = await rct.fetch();
+    const guildId = rct.message.guild.id;
     const messageId = rct.message.id;
 
     if (usr.bot)
@@ -46,7 +47,7 @@ async function handleReactionToggle(rct, usr, addRole) {
         return false
 
     const reaction = get("reactions", guildId);
-    if (reaction.message !== messageId || reaction.channel !== channelId)
+    if (reaction.message !== messageId)
         return false
 
     if (!rct._emoji.id)
@@ -55,7 +56,7 @@ async function handleReactionToggle(rct, usr, addRole) {
     if (!roleId)
         return false;
 
-    const member = rct.message.channel.guild.members.cache.get(usr.id);
+    const member = await rct.message.guild.members.fetch(usr.id);
     const hasRole = member.roles.cache.has(roleId);
     
     if (addRole && !hasRole) {
@@ -75,10 +76,10 @@ async function handleReactionRemove(rct, usr) {
     try {
         await handleReactionToggle(rct, usr, false);
     } catch (e) {}
-    addNewReactions(rct.message.channel.guild);
+    addNewReactions(rct.message.guild);
 }
 async function handleReactionRemoveAll(msg) {
-    addNewReactions(msg.channel.guild);
+    addNewReactions(msg.guild);
 }
 
 module.exports = {

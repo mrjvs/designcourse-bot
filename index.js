@@ -1,5 +1,5 @@
 const Discord = require('discord.js');
-const client = new Discord.Client();
+const client = new Discord.Client({ partials: ['REACTION'] });
 const { initGuild, handleReactionAdd, handleReactionRemove, handleReactionRemoveAll } = require("./events/collector");
 const { getAllGuilds } = require("./helpers/storage")
 const { onJoin } = require("./events/join")
