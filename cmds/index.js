@@ -1,6 +1,7 @@
 module.exports = [
-    require("./reaction"),
     require("./throttle"),
     require("./timeout"),
-    require("./test")
+    require("./roles"),
+    require("./say"),
+    // require("./test"),
 ];

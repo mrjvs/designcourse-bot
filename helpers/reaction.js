@@ -1,9 +1,9 @@
 const storage = require("./storage");
 
-function reactionsReady(guildId) {
-    return storage.get("reactions.channel", guildId) && storage.get("reactions.message", guildId);
+function reactionSystemReady(guildId, name) {
+    return storage.get("roles.systems."+name+".message", guildId) && storage.get("roles.systems."+name+".channel", guildId);
 }
 
 module.exports = {
-    reactionsReady,
+    reactionSystemReady,
 };

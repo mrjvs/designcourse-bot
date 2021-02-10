@@ -1,5 +1,5 @@
 const Discord = require('discord.js');
-const client = new Discord.Client({ partials: ['REACTION'] });
+const client = new Discord.Client({ partials: ['REACTION', 'MESSAGE', 'USER'] });
 const { initGuild, handleReactionAdd, handleReactionRemove, handleReactionRemoveAll } = require("./events/collector");
 const { getAllGuilds } = require("./helpers/storage")
 const { onJoin } = require("./events/join")
@@ -15,7 +15,7 @@ client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
     const guilds = getAllGuilds();
     guilds.forEach(async g => {
-        await initGuild(client, g);
+        initGuild(client, g);
     })
 });
 

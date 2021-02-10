@@ -5,10 +5,14 @@ let cache;
 
 /*
 guilddata: {
-    reactions: {
-        message: MESSAGE_ID,
-        channel: CHANNEL_ID,
-        reactions: {} KEY:VALUE - EMOJI_ID:ROLE_ID
+    roles: {
+        systems: {
+            SYSTEM_NAME: {
+                message: MESSAGE_ID,
+                channel: CHANNEL_ID,
+                reactions: {} KEY:VALUE - EMOJI_ID:ROLE_ID
+            }
+        }
     },
     throttle: {
         status: BOOLEAN,

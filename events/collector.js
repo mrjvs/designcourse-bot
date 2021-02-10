@@ -1,28 +1,29 @@
 const { get } = require("../helpers/storage");
-const { reactionsReady } = require("../helpers/reaction");
+const { reactionSystemReady } = require("../helpers/reaction");
 
 // add reaction message to cache and refresh emojis
 async function initGuild(client, guildId) {
-    const reaction = get("reactions", guildId);
-    if (!reactionsReady(guildId))
-        return false;
+    let reactions = get("roles.systems", guildId);
+    if (!reactions) reactions = {};
     const guild = client.guilds.cache.get(guildId);
     if (!guild)
         return false;
-    const channel = guild.channels.cache.get(reaction.channel);
-    await channel.messages.fetch(reaction.message);
-    addNewReactions(guild);
+    const systems = Object.keys(reactions);
+    for (let i = 0; i < systems.length; i++) {
+        const system = reactions[systems[i]];
+        if (!reactionSystemReady(guildId, systems[i])) continue;
+        try {
+            await addNewReactions(guild, system);
+        } catch (err) {};
+    }
 }
 
-async function addNewReactions(guild) {
-    const reaction = get("reactions", guild.id);
-    if (!reactionsReady(guild.id))
-        return false;
-    const channel = guild.channels.cache.get(reaction.channel);
-    let message = await channel.messages.cache.get(reaction.message);
-    let client = message.reactions.client;
+async function addNewReactions(guild, system) {
 
-    let emojis = Object.keys(reaction.reactions).filter(e=>!!e);
+    const channel = guild.channels.cache.get(system.channel);
+    let message = await channel.messages.fetch(system.message, true);
+    let client = message.client;
+    let emojis = Object.keys(system.reactions ? system.reactions : {}).filter(e=>!!e);
 
     message.reactions.cache.forEach((v) => {
         if (emojis.indexOf(v._emoji.id) == -1)
@@ -31,55 +32,55 @@ async function addNewReactions(guild) {
             emojis = emojis.filter(e=>e!=v._emoji.id)
     });
 
-    emojis.forEach(e=>message.react(e));
+
+    await Promise.all(emojis.map(e=>message.react(e)));
 }
 
 async function handleReactionToggle(rct, usr, addRole) {
+    console.log("reaction toggled")
     if (rct.partial)
         rct = await rct.fetch();
     const guildId = rct.message.guild.id;
     const messageId = rct.message.id;
 
+    if (!rct._emoji.id)
+        return false
+
     if (usr.bot)
         return false
 
-    if (!reactionsReady(guildId))
+    const systems = get("roles.systems", guildId);
+    const foundSystemName = Object.keys(systems).find(v=>systems[v].message===messageId);
+    if (!foundSystemName || !reactionSystemReady(guildId, foundSystemName))
         return false
 
-    const reaction = get("reactions", guildId);
-    if (reaction.message !== messageId)
-        return false
-
-    if (!rct._emoji.id)
-        return false;
-    const roleId = reaction.reactions[rct._emoji.id];
+    const roleId = systems[foundSystemName].reactions[rct._emoji.id];
     if (!roleId)
         return false;
 
-    const member = await rct.message.guild.members.fetch(usr.id);
+    const member = await rct.message.guild.members.fetch({ user: usr.id, force: true });
     const hasRole = member.roles.cache.has(roleId);
-    
-    if (addRole && !hasRole) {
+
+    if (addRole && !hasRole)
         await member.roles.add(roleId);
-    }
-    else if (!addRole && hasRole) {
+    else if (!addRole && hasRole)
         await member.roles.remove(roleId);
-    }
     return true;
 }
 
 async function handleReactionAdd(rct, usr) {
-    await handleReactionToggle(rct, usr, true);
+    try {
+        await handleReactionToggle(rct, usr, true);
+    } catch (err) {}
 }
 
 async function handleReactionRemove(rct, usr) {
     try {
         await handleReactionToggle(rct, usr, false);
     } catch (e) {}
-    addNewReactions(rct.message.guild);
 }
 async function handleReactionRemoveAll(msg) {
-    addNewReactions(msg.guild);
+
 }
 
 module.exports = {
