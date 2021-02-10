@@ -37,7 +37,6 @@ async function addNewReactions(guild, system) {
 }
 
 async function handleReactionToggle(rct, usr, addRole) {
-    console.log("reaction toggled")
     if (rct.partial)
         rct = await rct.fetch();
     const guildId = rct.message.guild.id;
