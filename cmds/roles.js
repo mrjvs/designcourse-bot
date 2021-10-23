@@ -1,10 +1,11 @@
 const storage = require("../helpers/storage");
-const { initGuild } = require("../events/collector");
 const { reactionSystemReady } = require("../helpers/reaction");
 const { sendError, sendSuccess } = require("../helpers/embed");
+const { MessageActionRow, MessageButton } = require("discord.js");
 
-async function editMessageWithButtons(msg, guildId, name) {
-    const system = storage.get("roles.systems." + name, guildId);
+async function editMessageWithButtons(msg, name) {
+    const guild = msg.guild;
+    const system = storage.get("roles.systems." + name, guild.id);
     if (!system || !system.channel || !system.message) {
         sendError(msg.channel, "No system, channel or message found");
         return false;
@@ -15,7 +16,20 @@ async function editMessageWithButtons(msg, guildId, name) {
         sendError(msg.channel, "Can only add buttons to a message of the bot");
         return false;
     }
-    console.log(message);
+
+    const buttons = Object.keys(system.reactions || {}).map(v=> {
+        return new MessageButton()
+            .setCustomId(["DCROLES", v, system.reactions[v]].join(":"))
+            .setEmoji(v)
+            .setStyle('SECONDARY')
+    })
+
+    await message.edit({
+        components: [
+            new MessageActionRow().addComponents(...buttons),
+        ]
+    });
+    return true;
 }
 
 function systemExists(guildId, name) {
@@ -122,11 +136,11 @@ async function systemStatus(msg, args) {
             value: Object.keys(reactions).length == 0 ? 'No roles configured' : Object.keys(reactions).map(v=>`${msg.guild.emojis.cache.get(v)?msg.guild.emojis.cache.get(v):'?'} - <@&${reactions[v]}>`).join("\n")
         }]
     };
-    msg.channel.send({embed});
+    msg.channel.send({embeds: [embed]});
 }
 
 async function refreshReactions(msg, args) {
-    const ret = await editMessageWithButtons(msg.client, msg.guild.id, args[2]);
+    const ret = await editMessageWithButtons(msg, args[2]);
     if (ret)
         sendSuccess(msg.channel, "Successfully refreshed role system");
 }

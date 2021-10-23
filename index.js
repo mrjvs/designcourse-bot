@@ -1,8 +1,6 @@
 require('dotenv').config();
 const { Client, Intents  } = require('discord.js');
-const client = new Client({ partials: ['REACTION', 'MESSAGE', 'USER'], intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MEMBERS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MESSAGE_REACTIONS] });
-const { initGuild, handleReactionAdd, handleReactionRemove, handleReactionRemoveAll } = require("./events/collector");
-const { getAllGuilds } = require("./helpers/storage")
+const client = new Client({ partials: ['REACTION', 'MESSAGE', 'USER'], intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MEMBERS, Intents.FLAGS.GUILD_MESSAGES ] });
 const { onJoin } = require("./events/join")
 const { TOKEN } = process.env;
 const { messageHandler } = require("./events/command");
@@ -13,20 +11,25 @@ if (["TOKEN", "MAX_JOINS", "PREFIX", "INVITE", "ROLE_TIMEOUT"].reduce((p,v) => p
     process.exit(1);
 }
 
+function eventWrapper(eventWrapper) {
+    return async (e) => {
+        try {
+            const data = eventWrapper(e);
+            if (data instanceof Promise)
+                await data;
+        } catch (err) {
+            console.error("Unhandled error", err);
+        }
+    }
+}
+
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
-    const guilds = getAllGuilds();
-    guilds.forEach(async g => {
-        initGuild(client, g);
-    })
 });
 
-client.on('messageCreate', messageHandler);
-client.on('interactionCreate', handleInteractionCreate);
-client.on("messageReactionAdd", handleReactionAdd);
-client.on("messageReactionRemove", handleReactionRemove);
-client.on("messageReactionRemoveAll", handleReactionRemoveAll);
+client.on('messageCreate', eventWrapper(messageHandler));
+client.on('interactionCreate', eventWrapper(handleInteractionCreate));
 
-client.on("guildMemberAdd", onJoin);
+client.on("guildMemberAdd", eventWrapper(onJoin));
 
 client.login(TOKEN);

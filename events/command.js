@@ -3,7 +3,7 @@ const { sendError } = require("../helpers/embed");
 let cmds = require("../cmds");
 cmds = [...cmds, require("../cmds/help")];
 
-function messageHandler(msg) {
+async function messageHandler(msg) {
     if (msg.author.bot) return;
     if (!msg.content.startsWith(PREFIX)) return;
 
@@ -22,7 +22,9 @@ function messageHandler(msg) {
 
     try {
         if (!theCmd.subCommands) {
-            theCmd.execute(msg, args);
+            let data = theCmd.execute(msg, args);
+            if (data instanceof Promise)
+                await data;
             return
         }
         let theSubCmd = Object.keys(theCmd.subCommands).find(sub=>sub==args[1]);
@@ -31,7 +33,9 @@ function messageHandler(msg) {
             return
         }
         theSubCmd = theCmd.subCommands[theSubCmd];
-        theSubCmd.execute(msg, args);
+        let data = theSubCmd.execute(msg, args);
+        if (data instanceof Promise)
+            await data;
     } catch (e) {
         console.error(e);
         sendError(msg.channel, "Whoops, Something went wrong when running this command!");

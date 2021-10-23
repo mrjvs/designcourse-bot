@@ -22,7 +22,7 @@ module.exports = {
                 try {
                     json = JSON.parse(removeArgs(msg.content, args, 2));
                     await msg.channel.send({
-                        embed: json,
+                        embeds: [json],
                     })
                 } catch (err) {
                     sendError(msg.channel, "Failed to send")
@@ -35,8 +35,9 @@ module.exports = {
             description: "send text",
             async execute(msg, args) {
                 try {
-                    await msg.channel.send(removeArgs(msg.content, args, 2), {
-                        disableMentions: "all"
+                    await msg.channel.send({
+                        content: removeArgs(msg.content, args, 2),
+                        allowedMentions: { parse: [] }
                     })
                 } catch (err) {
                     sendError(msg.channel, "Failed to send")
@@ -51,7 +52,7 @@ module.exports = {
                 try {
                     let message = await msg.channel.messages.fetch(args[2]);
                     await message.edit({
-                        embed: JSON.parse(removeArgs(msg.content, args, 3))
+                        embeds: [JSON.parse(removeArgs(msg.content, args, 3))]
                     })
                 } catch (err) {
                     sendError(msg.channel, "Failed to edit message")
@@ -65,8 +66,9 @@ module.exports = {
             async execute(msg, args) {
                 try {
                     let message = await msg.channel.messages.fetch(args[2]);
-                    await message.edit(removeArgs(msg.content, args, 3), {
-                        disableMentions: "all"
+                    await message.edit({
+                        content: removeArgs(msg.content, args, 3),
+                        allowedMentions: { parse: [] }
                     })
                 } catch (err) {
                     sendError(msg.channel, "Failed to edit message")
