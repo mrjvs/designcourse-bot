@@ -10,7 +10,7 @@ function messageHandler(msg) {
     const args = msg.content.split(" ");
     args[0] = args[0].slice(PREFIX.length);
 
-    const theCmd = cmds.find(cmd => cmd.cmd == args[0]);
+    const theCmd = cmds.find(cmd => cmd.cmd === args[0]);
     if (!theCmd) return;
 
     if (theCmd.admin) {
@@ -25,7 +25,7 @@ function messageHandler(msg) {
             theCmd.execute(msg, args);
             return
         }
-        let theSubCmd = Object.keys(theCmd.subCommands).find(sub=>sub==args[1]);
+        let theSubCmd = Object.keys(theCmd.subCommands).find(sub=>sub===args[1]);
         if (!theSubCmd){
             sendError(msg.channel, "That subcommand doesn't exist!");
             return

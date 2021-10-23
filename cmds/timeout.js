@@ -1,17 +1,20 @@
 const { get, set } = require("../helpers/storage");
 const { sendSuccess } = require("../helpers/embed");
+const {getGuildOrNew} = require("../helpers/db");
 
-function getTimeoutStatus(msg) {
-    sendSuccess(msg.channel, `Timeout status: ${get("timeout.status", msg.guild.id) ? "Enabled" : "Disabled"}!\nTimeout channel: <#${get("timeout.channel", msg.guild.id)}>`);
+async function getTimeoutStatus(msg) {
+    const dbGuild = await getGuildOrNew(msg.guild.id)
+    const guildTimeout = dbGuild.timeout
+    sendSuccess(msg.channel, `Timeout status: ${guildTimeout.enabled ? "Enabled" : "Disabled"}!\nTimeout channel: <#${guildTimeout.logChannel}>`);
 }
 
-function setTimeoutStatus(msg, _, bool) {
-    set("timeout.status", msg.guild.id, bool);
+async function setTimeoutStatus(msg, _, bool) {
+    await set("timeout.status", msg.guild.id, bool);
     sendSuccess(msg.channel, "Timeout status has been set to: " + (bool ? "Enabled" : "Disabled"));
 }
 
-function setTimeoutChannel(msg, args) {
-    set("timeout.channel", msg.guild.id, args[2]);
+async function setTimeoutChannel(msg, args) {
+    await set("timeout.channel", msg.guild.id, args[2]);
     sendSuccess(msg.channel, "Timeout channel has been set to: <#" + args[2] + ">!");
 }
 

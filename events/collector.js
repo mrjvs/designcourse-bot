@@ -1,17 +1,19 @@
 const { get } = require("../helpers/storage");
 const { reactionSystemReady } = require("../helpers/reaction");
+const {getGuildOrNew} = require("../helpers/db");
 
 // add reaction message to cache and refresh emojis
 async function initGuild(client, guildId) {
-    let reactions = get("roles.systems", guildId);
-    if (!reactions) reactions = {};
+    const dbGuild = await getGuildOrNew(guildId)
+    let roleSystems = dbGuild.roleSystems;
+    if (!roleSystems) roleSystems = {};
     const guild = client.guilds.cache.get(guildId);
     if (!guild)
         return false;
-    const systems = Object.keys(reactions);
+    const systems = Object.keys(roleSystems);
     for (let i = 0; i < systems.length; i++) {
-        const system = reactions[systems[i]];
-        if (!reactionSystemReady(guildId, systems[i])) continue;
+        const system = roleSystems[systems[i]];
+        if (!await reactionSystemReady(guildId, systems[i])) continue;
         try {
             await addNewReactions(guild, system);
         } catch (err) {};
@@ -48,12 +50,13 @@ async function handleReactionToggle(rct, usr, addRole) {
     if (usr.bot)
         return false
 
-    const systems = get("roles.systems", guildId);
-    const foundSystemName = Object.keys(systems).find(v=>systems[v].message===messageId);
-    if (!foundSystemName || !reactionSystemReady(guildId, foundSystemName))
+    const dbGuild = await getGuildOrNew(guildId)
+    let roleSystems = dbGuild.roleSystems;
+    const foundSystemName = Object.keys(roleSystems).find(v=>roleSystems[v].message===messageId);
+    if (!foundSystemName || !await reactionSystemReady(guildId, foundSystemName))
         return false
 
-    const roleId = systems[foundSystemName].reactions[rct._emoji.id];
+    const roleId = roleSystems[foundSystemName].reactions[rct._emoji.id];
     if (!roleId)
         return false;
 
