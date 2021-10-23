@@ -14,7 +14,7 @@ function messageHandler(msg) {
     if (!theCmd) return;
 
     if (theCmd.admin) {
-        if (!msg.member.hasPermission("ADMINISTRATOR")) {
+        if (!msg.member.permissions.has("ADMINISTRATOR")) {
             sendError(msg.channel, "Whoops, you don't have access to that command!");
             return
         }

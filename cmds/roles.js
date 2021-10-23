@@ -3,6 +3,21 @@ const { initGuild } = require("../events/collector");
 const { reactionSystemReady } = require("../helpers/reaction");
 const { sendError, sendSuccess } = require("../helpers/embed");
 
+async function editMessageWithButtons(msg, guildId, name) {
+    const system = storage.get("roles.systems." + name, guildId);
+    if (!system || !system.channel || !system.message) {
+        sendError(msg.channel, "No system, channel or message found");
+        return false;
+    }
+    const channel = guild.channels.cache.get(system.channel);
+    let message = await channel.messages.fetch(system.message, true);
+    if (message.author.id !== message.client.user.id) {
+        sendError(msg.channel, "Can only add buttons to a message of the bot");
+        return false;
+    }
+    console.log(message);
+}
+
 function systemExists(guildId, name) {
     return !!storage.get("roles.systems." + name, guildId);
 }
@@ -110,9 +125,10 @@ async function systemStatus(msg, args) {
     msg.channel.send({embed});
 }
 
-async function refreshReactions(msg) {
-    await initGuild(msg.client, msg.guild.id);
-    sendSuccess(msg.channel, "Successfully refreshed role system");
+async function refreshReactions(msg, args) {
+    const ret = await editMessageWithButtons(msg.client, msg.guild.id, args[2]);
+    if (ret)
+        sendSuccess(msg.channel, "Successfully refreshed role system");
 }
 
 module.exports = {
@@ -161,8 +177,8 @@ module.exports = {
 
         // tools
         refresh:  {
-            args: [],
-            description: "Refresh all reaction systems, fixes missing emojis and broken cache",
+            args: ["<name>"],
+            description: "Refresh a reaction system",
             execute: refreshReactions,
         },
         status:  {

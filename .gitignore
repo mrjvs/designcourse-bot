@@ -4,3 +4,4 @@ store
 test.sh
 runtest.sh
 .vscode
+.env

@@ -32,7 +32,6 @@ async function addNewReactions(guild, system) {
             emojis = emojis.filter(e=>e!=v._emoji.id)
     });
 
-
     await Promise.all(emojis.map(e=>message.react(e)));
 }
 
