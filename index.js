@@ -6,9 +6,11 @@ const { TOKEN } = process.env;
 const { messageHandler } = require("./events/command");
 const { handleInteractionCreate } = require('./events/buttons');
 
-if (["TOKEN", "MAX_JOINS", "PREFIX", "INVITE", "ROLE_TIMEOUT"].reduce((p,v) => p ? p : typeof process.env[v] === "undefined", false)) {
-    console.error("Missing env variables, exiting");
-    process.exit(1);
+let missing = ["TOKEN", "MAX_JOINS", "PREFIX", "INVITE", "ROLE_TIMEOUT", "MONGODB_URI"].filter(envVar => typeof process.env[envVar] === "undefined")
+
+if (missing.length !== 0) {
+    console.error(`Missing env variables (${missing.join(", ")}), exiting`)
+    process.exit(1)
 }
 
 function eventWrapper(eventWrapper) {

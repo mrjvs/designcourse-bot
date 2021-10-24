@@ -6,9 +6,9 @@ let throttleUsers = {}
 let timeouts = {};
 
 function onJoin(usr) {
-    if (get("throttle.status", usr.guild.id))
+    if (get("throttle.enabled", usr.guild.id))
         doThrottle(usr);
-    if (get("timeout.status", usr.guild.id))
+    if (get("timeout.enabled", usr.guild.id))
         startRoleTimer(usr.guild.id, usr);
 }
 
@@ -38,15 +38,16 @@ function startRoleTimer(guildId, usr) {
             const user = await usr.fetch();
             if (user.roles.cache.size > 1)
                 return;
-            kickTimeoutUser(user);
+            await kickTimeoutUser(user);
         } catch (e) {}
     }, parseInt(ROLE_TIMEOUT));
 }
 
 async function kickThrottledUser(usr) {
     try {
-        if (get("throttle.channel", usr.guild.id))
-            await usr.client.guilds.cache.get(usr.guild.id).channels.cache.get(get("throttle.channel", usr.guild.id)).send({embeds:[{
+        const throttleChannel = await get("throttle.logChannelId", usr.guild.id);
+        if (throttleChannel)
+            await usr.client.guilds.cache.get(usr.guild.id).channels.cache.get(throttleChannel).send({embeds: [{
                 color: 1752220,
                 title: "Throttled!",
                 description: `user: ${usr.user.tag} (${usr.id})`,
@@ -63,8 +64,9 @@ async function kickThrottledUser(usr) {
 
 async function kickTimeoutUser(usr) {
     try {
-        if (get("timeout.channel", usr.guild.id))
-            await usr.client.guilds.cache.get(usr.guild.id).channels.cache.get(get("timeout.channel", usr.guild.id)).send({embeds: [{
+        const timeoutChannel = await get("timeout.logChannelId", usr.guild.id)
+        if (timeoutChannel)
+            await usr.client.guilds.cache.get(usr.guild.id).channels.cache.get(timeoutChannel).send({embeds:[{
                 color: 1752220,
                 title: "Timed out!",
                 description: `user: ${usr.user.tag} (${usr.id})`,
