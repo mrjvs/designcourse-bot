@@ -32,10 +32,10 @@ module.exports = {
         else {
             description = cmds.map(v=>getHelp(v)).join("\n");
         }
-        msg.channel.send({embed: {
+        msg.channel.send({ embeds: [{
             color: 1752220,
             title,
             description
-        }});
+        }]});
     }
 };

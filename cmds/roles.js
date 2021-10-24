@@ -1,7 +1,36 @@
 const storage = require("../helpers/storage");
-const { initGuild } = require("../events/collector");
 const { reactionSystemReady } = require("../helpers/reaction");
 const { sendError, sendSuccess } = require("../helpers/embed");
+const { MessageActionRow, MessageButton } = require("discord.js");
+
+async function editMessageWithButtons(msg, name) {
+    const guild = msg.guild;
+    const system = storage.get("roles.systems." + name, guild.id);
+    if (!system || !system.channel || !system.message) {
+        sendError(msg.channel, "No system, channel or message found");
+        return false;
+    }
+    const channel = guild.channels.cache.get(system.channel);
+    let message = await channel.messages.fetch(system.message, true);
+    if (message.author.id !== message.client.user.id) {
+        sendError(msg.channel, "Can only add buttons to a message of the bot");
+        return false;
+    }
+
+    const buttons = Object.keys(system.reactions || {}).map(v=> {
+        return new MessageButton()
+            .setCustomId(["DCROLES", v, system.reactions[v]].join(":"))
+            .setEmoji(v)
+            .setStyle('SECONDARY')
+    })
+
+    await message.edit({
+        components: [
+            new MessageActionRow().addComponents(...buttons),
+        ]
+    });
+    return true;
+}
 
 function systemExists(guildId, name) {
     return !!storage.get("roles.systems." + name, guildId);
@@ -107,12 +136,13 @@ async function systemStatus(msg, args) {
             value: Object.keys(reactions).length == 0 ? 'No roles configured' : Object.keys(reactions).map(v=>`${msg.guild.emojis.cache.get(v)?msg.guild.emojis.cache.get(v):'?'} - <@&${reactions[v]}>`).join("\n")
         }]
     };
-    msg.channel.send({embed});
+    msg.channel.send({embeds: [embed]});
 }
 
-async function refreshReactions(msg) {
-    await initGuild(msg.client, msg.guild.id);
-    sendSuccess(msg.channel, "Successfully refreshed role system");
+async function refreshReactions(msg, args) {
+    const ret = await editMessageWithButtons(msg, args[2]);
+    if (ret)
+        sendSuccess(msg.channel, "Successfully refreshed role system");
 }
 
 module.exports = {
@@ -161,8 +191,8 @@ module.exports = {
 
         // tools
         refresh:  {
-            args: [],
-            description: "Refresh all reaction systems, fixes missing emojis and broken cache",
+            args: ["<name>"],
+            description: "Refresh a reaction system",
             execute: refreshReactions,
         },
         status:  {

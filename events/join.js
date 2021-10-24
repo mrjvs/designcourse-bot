@@ -5,11 +5,6 @@ let throttle = {}
 let throttleUsers = {}
 let timeouts = {};
 
-const interval = setInterval(() => {
-    throttle = {};
-    throttleUsers = {};
-}, 60*1000);
-
 function onJoin(usr) {
     if (get("throttle.status", usr.guild.id))
         doThrottle(usr);
@@ -41,7 +36,7 @@ function startRoleTimer(guildId, usr) {
         delete timeouts[guildId][usr.id];
         try {
             const user = await usr.fetch();
-            if (user.roles.cache.array().length > 1)
+            if (user.roles.cache.size > 1)
                 return;
             kickTimeoutUser(user);
         } catch (e) {}
@@ -51,15 +46,15 @@ function startRoleTimer(guildId, usr) {
 async function kickThrottledUser(usr) {
     try {
         if (get("throttle.channel", usr.guild.id))
-            await usr.client.guilds.cache.get(usr.guild.id).channels.cache.get(get("throttle.channel", usr.guild.id)).send({embed:{
+            await usr.client.guilds.cache.get(usr.guild.id).channels.cache.get(get("throttle.channel", usr.guild.id)).send({embeds:[{
                 color: 1752220,
                 title: "Throttled!",
                 description: `user: ${usr.user.tag} (${usr.id})`,
                 timestamp: new Date()
-            }});
+            }]});
     } catch (e) {}
     try {
-        await usr.send(`Hey ${usr.user.username},\n\nDesignCourse is currently experiencing a lot of joins at once.\nIn this case we limit the speed at which people join.\n**Please wait 1 minute**, then you can join again with this invite link: ${INVITE}\n\nThank you for your patience\n - The Designcourse Mod team`);
+        await usr.send({ content: `Hey ${usr.user.username},\n\nDesignCourse is currently experiencing a lot of joins at once.\nIn this case we limit the speed at which people join.\n**Please wait 1 minute**, then you can join again with this invite link: ${INVITE}\n\nThank you for your patience\n - The Designcourse Mod team` });
     } catch (e) {}
     try {
         await usr.kick("User join got throttled!");
@@ -69,15 +64,15 @@ async function kickThrottledUser(usr) {
 async function kickTimeoutUser(usr) {
     try {
         if (get("timeout.channel", usr.guild.id))
-            await usr.client.guilds.cache.get(usr.guild.id).channels.cache.get(get("timeout.channel", usr.guild.id)).send({embed:{
+            await usr.client.guilds.cache.get(usr.guild.id).channels.cache.get(get("timeout.channel", usr.guild.id)).send({embeds: [{
                 color: 1752220,
                 title: "Timed out!",
                 description: `user: ${usr.user.tag} (${usr.id})`,
                 timestamp: new Date()
-            }});
+            }]});
     } catch (e) {}
     try {
-        await usr.send(`Hey ${usr.user.username},\n\nYou're taking a long time to choose your role, we've kicked you from the server but you can join back with this invite: ${INVITE}\nIf you're having trouble with the role system. Consider sending one of us a message.\n - The Designcourse Mod team`); 
+        await usr.send({ content: `Hey ${usr.user.username},\n\nYou're taking a long time to choose your role, we've kicked you from the server but you can join back with this invite: ${INVITE}\nIf you're having trouble with the role system. Consider sending one of us a message.\n - The Designcourse Mod team` }); 
     } catch (e) {}
     try {
         await usr.kick("User got timed out!");
