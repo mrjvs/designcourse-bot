@@ -1,7 +1,8 @@
-const storage = require("./storage");
+const {get} = require("./storage");
 
-function reactionSystemReady(guildId, name) {
-    return storage.get("roles.systems."+name+".message", guildId) && storage.get("roles.systems."+name+".channel", guildId);
+async function reactionSystemReady(guildId, name) {
+    const guildRoleSystems = await get(`roleSystems.${name}`, guildId)
+    return guildRoleSystems.messageId && guildRoleSystems.channelId
 }
 
 module.exports = {

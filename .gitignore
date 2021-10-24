@@ -5,3 +5,4 @@ test.sh
 runtest.sh
 .vscode
 .env
+.idea/
