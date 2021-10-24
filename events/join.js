@@ -5,10 +5,10 @@ let throttle = {}
 let throttleUsers = {}
 let timeouts = {};
 
-function onJoin(usr) {
-    if (get("throttle.enabled", usr.guild.id))
-        doThrottle(usr);
-    if (get("timeout.enabled", usr.guild.id))
+async function onJoin(usr) {
+    if (await get("throttle.enabled", usr.guild.id))
+        await doThrottle(usr);
+    if (await get("timeout.enabled", usr.guild.id))
         startRoleTimer(usr.guild.id, usr);
 }
 

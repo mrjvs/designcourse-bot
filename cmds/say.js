@@ -5,7 +5,7 @@ function removeArgs(content, args, count = 1) {
     let startIndex = process.env.PREFIX.length;
     for (let i = 0; i < count; i++) {
         startIndex += args[i].length;
-        while (content[startIndex] == " ") startIndex++;
+        while (content[startIndex] === " ") startIndex++;
     }
     return content.slice(startIndex);
 }

@@ -39,7 +39,7 @@ async function systemExists(guildId, name) {
 
 async function systemExistsError(msg, name) {
     if (!name || name.length === 0 || !await systemExists(msg.guild.id, name)) {
-        sendError(msg.channel, "Reaction system with that name doesn't exist");
+        sendError(msg.channel, `Reaction system with the name \`${name}\` doesn't exist`);
         return true;
     }
     return false;
@@ -47,21 +47,21 @@ async function systemExistsError(msg, name) {
 
 async function createSystem(msg, args) {
     if (!args[2] || args[2].length === 0 || await systemExists(msg.guild.id, args[2])) {
-        sendError(msg.channel, "Reaction system with that name already exists");
+        sendError(msg.channel, `Reaction system with the name \`${args[2]}\` already exists`);
         return;
     }
     await storage.set(`roleSystems.${args[2]}`, msg.guild.id, {});
-    sendSuccess(msg.channel, "Successfully created reaction system");
+    sendSuccess(msg.channel, `Successfully created reaction system with name \`${args[2]}\``);
 }
 
 async function deleteSystem(msg, args) {
     if (!args[2] || args[2].length === 0 || !await systemExists(msg.guild.id, args[2])) {
-        sendError(msg.channel, "Reaction system with that name doesnt exist");
+        sendError(msg.channel, `Reaction system with the name \`${args[2]}\` doesnt exist`);
         return;
     }
     await storage.set(`roleSystems.${args[2]}`, msg.guild.id, undefined);
     
-    sendSuccess(msg.channel, "Successfully deleted reaction system");
+    sendSuccess(msg.channel, `Successfully deleted reaction system with name \`${args[2]}\``);
 }
 
 async function listSystems(msg) {
@@ -94,25 +94,25 @@ async function setSystemChannel(msg, args) {
 async function addSystemRole(msg, args) {
     if (await systemExistsError(msg, args[2])) return;
     if (!args[3] || args[3].length === 0) {
-        sendError(msg.channel, "emoji id invalid");
+        sendError(msg.channel, "Emoji ID invalid");
         return;
     }
     if (!args[4] || args[4].length === 0) {
-        sendError(msg.channel, "role id invalid");
+        sendError(msg.channel, "Role ID invalid");
         return;
     }
     await storage.set(`roleSystems.${args[2]}.reactions.${args[3]}`, msg.guild.id, args[4]);
-    sendSuccess(msg.channel, "Successfully added role");
+    sendSuccess(msg.channel, `Successfully added emoji ID \`${args[3]}\` with role ID \`${args[4]}\``);
 }
 
 async function removeSystemRole(msg, args) {
     if (await systemExistsError(msg, args[2])) return;
     if (!args[3] || args[3].length === 0 || !await storage.set(`roleSystems.${args[2]}.reactions.${args[3]}`, msg.guild.id)) {
-        sendError(msg.channel, "couldnt find emoji in reaction system");
+        sendError(msg.channel, "Couldn't find emoji in reaction system");
         return;
     }
     await storage.set(`roleSystems.${args[2]}.reactions.${args[3]}`, msg.guild.id, undefined);
-    sendSuccess(msg.channel, "Successfully removed role");
+    sendSuccess(msg.channel, `Successfully removed role with ID \`${args[3]}\``);
 }
 
 async function systemStatus(msg, args) {

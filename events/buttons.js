@@ -11,7 +11,7 @@ async function toggleReaction(interaction) {
 
     const systems = get("roles.systems", guildId);
     const foundSystemName = Object.keys(systems).find(v=>systems[v].message===messageId);
-    if (!foundSystemName || !reactionSystemReady(guildId, foundSystemName))
+    if (!foundSystemName || !await reactionSystemReady(guildId, foundSystemName))
         return false;
 
     const roleId = systems[foundSystemName].reactions[parts[1]];

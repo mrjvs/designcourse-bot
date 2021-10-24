@@ -1,5 +1,5 @@
 const { get, set } = require("../helpers/storage");
-const { sendSuccess } = require("../helpers/embed");
+const { sendSuccess, sendError} = require("../helpers/embed");
 const {getGuildOrNew} = require("../helpers/db");
 
 async function getTimeoutStatus(msg) {
@@ -13,6 +13,10 @@ async function setTimeoutStatus(msg, _, bool) {
 }
 
 async function setTimeoutChannel(msg, args) {
+    if (!/^[0-9]+$/.test(args[2])) {
+        sendError(msg.channel, "The timeout channel needs to be an ID!")
+        return
+    }
     await set("timeout.logChannelId", msg.guild.id, args[2]);
     sendSuccess(msg.channel, "Timeout channel has been set to: <#" + args[2] + ">!");
 }
