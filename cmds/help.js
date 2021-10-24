@@ -21,7 +21,7 @@ module.exports = {
         let description;
         let title = "Help"
         if (args[1]) {
-            const theCmd = cmds.find(cmd=>cmd.cmd==args[1]);
+            const theCmd = cmds.find(cmd=>cmd.cmd===args[1]);
             if (!theCmd) {
                 sendError(msg.channel, "Can't find that command");
                 return

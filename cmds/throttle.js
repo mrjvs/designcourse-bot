@@ -13,6 +13,10 @@ async function setThrottleStatus(msg, _, bool) {
 }
 
 async function setThrottleChannel(msg, args) {
+    if (!/^[0-9]+$/.test(args[2])) {
+        sendError(msg.channel, "The throttle channel needs to be an ID!")
+        return
+    }
     await set("throttle.logChannelId", msg.guild.id, args[2])
     sendSuccess(msg.channel, "Throttle channel has been set to: <#" + args[2] + ">!");
 }
