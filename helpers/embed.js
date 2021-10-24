@@ -17,7 +17,7 @@ function sendError(channel, txt, title = "Error!") {
 function wrapInteraction(interaction) {
     return {
         send(a) {
-            interaction.reply({
+            return interaction.reply({
                 ...a,
                 ephemeral: true,
             });

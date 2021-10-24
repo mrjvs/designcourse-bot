@@ -6,13 +6,13 @@ const { MessageActionRow, MessageButton } = require("discord.js");
 
 async function editMessageWithButtons(msg, name) {
     const guild = msg.guild;
-    const system = storage.get("roles.systems." + name, guild.id);
-    if (!system || !system.channel || !system.message) {
+    const system = await storage.get("roleSystems." + name, guild.id);
+    if (!system || !system.channelId || !system.messageId) {
         sendError(msg.channel, "No system, channel or message found");
         return false;
     }
-    const channel = guild.channels.cache.get(system.channel);
-    let message = await channel.messages.fetch(system.message, true);
+    const channel = guild.channels.cache.get(system.channelId);
+    let message = await channel.messages.fetch(system.messageId, true);
     if (message.author.id !== message.client.user.id) {
         sendError(msg.channel, "Can only add buttons to a message of the bot");
         return false;
