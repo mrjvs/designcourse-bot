@@ -4,8 +4,7 @@ const {getGuildOrNew} = require("../helpers/db");
 
 // add reaction message to cache and refresh emojis
 async function initGuild(client, guildId) {
-    const dbGuild = await getGuildOrNew(guildId)
-    let roleSystems = dbGuild.roleSystems;
+    let roleSystems = await get("roleSystems", guildId);
     if (!roleSystems) roleSystems = {};
     const guild = client.guilds.cache.get(guildId);
     if (!guild)
@@ -50,8 +49,7 @@ async function handleReactionToggle(rct, usr, addRole) {
     if (usr.bot)
         return false
 
-    const dbGuild = await getGuildOrNew(guildId)
-    let roleSystems = dbGuild.roleSystems;
+    let roleSystems = await get("roleSystems", guildId);
     const foundSystemName = Object.keys(roleSystems).find(v=>roleSystems[v].message===messageId);
     if (!foundSystemName || !await reactionSystemReady(guildId, foundSystemName))
         return false

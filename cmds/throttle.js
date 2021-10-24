@@ -1,20 +1,19 @@
-const { set } = require("../helpers/storage");
-const { sendSuccess } = require("../helpers/embed");
+const { set, get} = require("../helpers/storage");
+const { sendSuccess, sendError} = require("../helpers/embed");
 const {getGuildOrNew} = require("../helpers/db");
 
 async function getThrottleStatus(msg) {
-    const dbGuild = await getGuildOrNew(msg.guild.id)
-    const guildThrottle = dbGuild.throttle
-    sendSuccess(msg.channel, `Throttle status: ${guildThrottle.enabled ? "Enabled" : "Disabled"}!\nThrottle channel: <#${guildThrottle.logChannel}>`);
+    const guildThrottle = await get("throttle", msg.guild.id) || {}
+    sendSuccess(msg.channel, `Throttle status: ${guildThrottle.enabled ? "Enabled" : "Disabled"}!\nThrottle channel: <#${guildThrottle.logChannelId}>`);
 }
 
 async function setThrottleStatus(msg, _, bool) {
-    await set("throttle.status", msg.guild.id, bool)
+    await set("throttle.enabled", msg.guild.id, bool)
     sendSuccess(msg.channel, "Throttle status has been set to: " + (bool ? "Enabled" : "Disabled"));
 }
 
 async function setThrottleChannel(msg, args) {
-    await set("throttle.channel", msg.guild.id, args[2])
+    await set("throttle.logChannelId", msg.guild.id, args[2])
     sendSuccess(msg.channel, "Throttle channel has been set to: <#" + args[2] + ">!");
 }
 

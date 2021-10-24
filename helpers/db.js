@@ -2,29 +2,32 @@ const mongoose = require('mongoose');
 const { MONGODB_URI } = process.env
 
 const roleSystemSchema = new mongoose.Schema({
+    _id: false,
     messageId: String,
     channelId: String,
     reactions: { // Emoji ID: Role ID
-        type: Map,
+        type: Object,
         of: String,
         default: {}
     }
 })
 
 const throttleSchema = new mongoose.Schema({
+    _id: false,
     enabled: Boolean,
-    logChannel: String
+    logChannelId: String
 })
 
 const timeoutSchema = new mongoose.Schema({
+    _id: false,
     enabled: Boolean,
-    logChannel: String
+    logChannelId: String
 })
 
 const guildSchema = new mongoose.Schema({
     _id: String,
     roleSystems: {
-        type: Map,
+        type: Object,
         of: roleSystemSchema
     },
     throttle: throttleSchema,
@@ -40,7 +43,7 @@ async function main() {
 }
 
 async function getGuildOrNew(guildId) {
-    const guild = await Guild.findById(guildId).exec()
+    const guild = await Guild.findById(guildId)
     if (!guild) {
         return new Guild({ _id: guildId })
     }

@@ -1,8 +1,16 @@
 const { Guild, getGuildOrNew } = require("./db")
-const _ = require('lodash');
 
 async function set(path, guildId, value) {
-    await Guild.findByIdAndUpdate(guildId, { $set: {[path]: value} }, { upsert: true })
+    const guild = await getGuildOrNew(guildId);
+    guild.set(path, value)
+    if (guild.isModified()) {
+        await guild.save()
+    }
+}
+
+async function get(path, guildId) {
+    const guild = await getGuildOrNew(guildId)
+    return guild.get(path)
 }
 
 async function getAllGuilds() {
@@ -11,5 +19,6 @@ async function getAllGuilds() {
 
 module.exports = {
     set,
+    get,
     getAllGuilds
 };

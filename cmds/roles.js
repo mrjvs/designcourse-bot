@@ -5,13 +5,12 @@ const { sendError, sendSuccess } = require("../helpers/embed");
 const {getGuildOrNew, Guild} = require("../helpers/db");
 
 async function systemExists(guildId, name) {
-    const dbGuild = await getGuildOrNew(guildId)
-    return !!dbGuild.roleSystems[name]
+    return !!await storage.get(`roleSystems.${name}`, guildId)
 }
 
 async function systemExistsError(msg, name) {
     if (!name || name.length === 0 || !await systemExists(msg.guild.id, name)) {
-        sendError(msg.channel, "Reaction system with that name doesnt exist");
+        sendError(msg.channel, "Reaction system with that name doesn't exist");
         return true;
     }
     return false;
@@ -22,7 +21,7 @@ async function createSystem(msg, args) {
         sendError(msg.channel, "Reaction system with that name already exists");
         return;
     }
-    await storage.set("roleSystems." + args[2], msg.guild.id, {});
+    await storage.set(`roleSystems.${args[2]}`, msg.guild.id, {});
     sendSuccess(msg.channel, "Successfully created reaction system");
 }
 
@@ -37,11 +36,9 @@ async function deleteSystem(msg, args) {
 }
 
 async function listSystems(msg) {
-    const dbGuild = await getGuildOrNew(msg.guild.id)
-    let allSystems = dbGuild.roleSystems;
+    let allSystems = await storage.get("roleSystems", msg.guild.id)
     if (!allSystems || Object.keys(allSystems).length === 0)
         allSystems = { "No systems yet": true };
-    console.log(allSystems)
     sendSuccess(msg.channel, `Systems:\n${Object.keys(allSystems).map(v=>` - ${v}`).join("\n")}`);
 }
 
@@ -51,7 +48,7 @@ async function setSystemMessage(msg, args) {
         sendError(msg.channel, "Message id invalid");
         return;
     }
-    await storage.set(`roleSystems.${args[2]}.message`, msg.guild.id, args[3]);
+    await storage.set(`roleSystems.${args[2]}.messageId`, msg.guild.id, args[3]);
     sendSuccess(msg.channel, "Successfully set message id");
 }
 
@@ -61,7 +58,7 @@ async function setSystemChannel(msg, args) {
         sendError(msg.channel, "Channel id invalid");
         return;
     }
-    await storage.set(`roleSystems.${args[2]}.channel`, msg.guild.id, args[3]);
+    await storage.set(`roleSystems.${args[2]}.channelId`, msg.guild.id, args[3]);
     sendSuccess(msg.channel, "Successfully set channel id");
 }
 
@@ -81,21 +78,21 @@ async function addSystemRole(msg, args) {
 
 async function removeSystemRole(msg, args) {
     if (await systemExistsError(msg, args[2])) return;
-    if (!args[3] || args[3].length === 0 || !await storage.set("roleSystems." + args[2] + ".reactions." + args[3], msg.guild.id)) {
+    if (!args[3] || args[3].length === 0 || !await storage.set(`roleSystems.${args[2]}.reactions.${args[3]}`, msg.guild.id)) {
         sendError(msg.channel, "couldnt find emoji in reaction system");
         return;
     }
-    await storage.set(`roleSystems.${args[2]}reactions.${args[3]}`, msg.guild.id, undefined);
+    await storage.set(`roleSystems.${args[2]}.reactions.${args[3]}`, msg.guild.id, undefined);
     sendSuccess(msg.channel, "Successfully removed role");
 }
 
 async function systemStatus(msg, args) {
     if (await systemExistsError(msg, args[2])) return;
     const isActive = reactionSystemReady(msg.guild.id, args[2]);
-    const dbGuild = getGuildOrNew(msg.guild.id)
-    const channel = dbGuild.roleSystems[args[2]].channelId
-    const message = dbGuild.roleSystems[args[2]].messageId
-    let reactions = dbGuild.roleSystems[args[2]].reactions
+    const roleSystem = await storage.get(`roleSystems.${args[2]}`, msg.guild.id)
+    const channel = roleSystem.channelId
+    const message = roleSystem.messageId
+    let reactions = roleSystem.reactions
     if (!reactions) reactions = {};
     const embed = {
         title: "Reaction system " + args[2],

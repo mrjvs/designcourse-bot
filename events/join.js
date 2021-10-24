@@ -11,9 +11,9 @@ const interval = setInterval(() => {
 }, 60*1000);
 
 async function onJoin(usr) {
-    if (await get("throttle.status", usr.guild.id))
+    if (await get("throttle.enabled", usr.guild.id))
         await doThrottle(usr);
-    if (await get("timeout.status", usr.guild.id))
+    if (await get("timeout.enabled", usr.guild.id))
         startRoleTimer(usr.guild.id, usr);
 }
 
@@ -50,7 +50,7 @@ function startRoleTimer(guildId, usr) {
 
 async function kickThrottledUser(usr) {
     try {
-        const throttleChannel = await get("throttle.logChannel", usr.guild.id);
+        const throttleChannel = await get("throttle.logChannelId", usr.guild.id);
         if (throttleChannel)
             await usr.client.guilds.cache.get(usr.guild.id).channels.cache.get(throttleChannel).send({embed:{
                 color: 1752220,
@@ -69,7 +69,7 @@ async function kickThrottledUser(usr) {
 
 async function kickTimeoutUser(usr) {
     try {
-        const timeoutChannel = await get("timeout.logChannel", usr.guild.id)
+        const timeoutChannel = await get("timeout.logChannelId", usr.guild.id)
         if (timeoutChannel)
             await usr.client.guilds.cache.get(usr.guild.id).channels.cache.get(timeoutChannel).send({embed:{
                 color: 1752220,
